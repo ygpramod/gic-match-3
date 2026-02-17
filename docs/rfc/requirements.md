@@ -3,7 +3,6 @@
 ## 1. Authority and Scope
 
 This document is the single source of truth for all functional and behavioral requirements.
-
 The implementation must strictly follow this specification. Do not add, modify, or infer requirements beyond what is explicitly defined here.
 
 ---
@@ -63,12 +62,25 @@ Examples:
 H^^*
 V*@^
 
+### 2.3.1 Parsing Rules
+
+For a brick string input (e.g., `HABC` or `VABC` where A, B, C are symbols):
+
+**Horizontal (H):**
+- Symbol A is at relative (row 0, col 0) (Left)
+- Symbol B is at relative (row 0, col 1) (Center)
+- Symbol C is at relative (row 0, col 2) (Right)
+
+**Vertical (V):**
+- Symbol A is at relative (row 0, col 0) (Top)
+- Symbol B is at relative (row 1, col 0) (Middle)
+- Symbol C is at relative (row 2, col 0) (Bottom)
+
 ---
 
 ## 2.4 Active Brick
 
 The Active Brick is the brick currently falling and controllable by the user.
-
 Only one active brick exists at any time.
 
 ---
@@ -76,7 +88,6 @@ Only one active brick exists at any time.
 ## 2.5 Stationary Brick
 
 A brick becomes stationary when it cannot move down any further.
-
 Stationary bricks remain fixed in the field unless removed by match removal.
 
 ---
@@ -104,7 +115,13 @@ Constraints:
 - Maximum 5 bricks
 - Minimum 0 bricks
 - Each brick must follow valid brick format
-- Invalid input must be rejected
+
+### 3.1.1 Error Handling
+
+If input is invalid (wrong format, bounds violation, invalid symbols):
+1. Display an error message indicating the failure.
+2. Re-prompt the user for input (return to start of Section 3.1).
+3. Do not start the game until valid input is received.
 
 ---
 
@@ -117,8 +134,6 @@ Horizontal bricks spawn:
 - Centered horizontally
 - In row 0
 
----
-
 ## 4.2 Vertical Brick Spawn
 
 Vertical bricks spawn:
@@ -126,13 +141,11 @@ Vertical bricks spawn:
 - Centered horizontally
 - Occupying rows 0, 1, 2
 
----
-
 ## 4.3 Spawn Failure Condition
 
 If any required spawn cell is already occupied:
-
-Game ends immediately.
+1. The game ends immediately.
+2. Proceed to **Section 12 (Game End Behavior)**.
 
 ---
 
@@ -210,7 +223,6 @@ Final position must be valid.
 # 7. Automatic Drop
 
 After command processing, the active brick must automatically move down by exactly one row if possible.
-
 If it cannot move down:
 
 Brick becomes stationary.
@@ -222,8 +234,8 @@ Brick becomes stationary.
 A brick becomes stationary when:
 
 - It cannot move down further due to:
-    - Bottom boundary, OR
-    - Collision with stationary brick
+  - Bottom boundary, OR
+  - Collision with stationary brick
 
 Once stationary:
 
@@ -235,7 +247,6 @@ Once stationary:
 # 9. Match Detection
 
 After a brick becomes stationary, detect matches.
-
 Match definition:
 
 A match occurs when:
@@ -258,7 +269,6 @@ When matches are detected:
 Important constraint:
 
 Gravity must NOT be applied after removal.
-
 Remaining cells stay in their current positions.
 
 ---
