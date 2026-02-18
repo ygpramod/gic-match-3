@@ -113,7 +113,7 @@ class GameEngineTest {
 
     @Test
     fun `should lock horizontal brick into field when hitting bottom`() {
-        val brick = Brick(Orientation.Horizontal, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val brick = Brick(Orientation.Horizontal, listOf(Symbol.Star, Symbol.At, Symbol.Star))
         val config = GameConfig(5, 5, listOf(brick))
         val engine = GameEngine(config)
 
@@ -126,7 +126,7 @@ class GameEngineTest {
         assertNull(engine.activeBrick, "Active brick should be null after locking")
 
         assertEquals(Symbol.Star, engine.field.get(1, 4))
-        assertEquals(Symbol.Star, engine.field.get(2, 4))
+        assertEquals(Symbol.At, engine.field.get(2, 4))
         assertEquals(Symbol.Star, engine.field.get(3, 4))
     }
 
@@ -150,7 +150,7 @@ class GameEngineTest {
 
     @Test
     fun `should stack horizontal bricks`() {
-        val hBrick = Brick(Orientation.Horizontal, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val hBrick = Brick(Orientation.Horizontal, listOf(Symbol.Star, Symbol.Star, Symbol.At))
         val config = GameConfig(5, 5, listOf(hBrick, hBrick))
         val engine = GameEngine(config)
 
@@ -171,7 +171,7 @@ class GameEngineTest {
 
     @Test
     fun `should stack vertical bricks`() {
-        val vBrick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val vBrick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Tilde, Symbol.At))
         val config = GameConfig(5, 6, listOf(vBrick, vBrick))
         val engine = GameEngine(config)
 
@@ -186,14 +186,14 @@ class GameEngineTest {
 
         assertNull(engine.activeBrick, "Brick should lock when hitting the stack")
 
-        assertEquals(Symbol.Star, engine.field.get(2, 2)) // Bottom of top brick
+        assertEquals(Symbol.At, engine.field.get(2, 2)) // Bottom of top brick
         assertEquals(Symbol.Star, engine.field.get(2, 3)) // Top of bottom brick
     }
 
     @Test
     fun `should stack horizontal brick on top of vertical brick`() {
-        val vBrick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
-        val hBrick = Brick(Orientation.Horizontal, listOf(Symbol.At, Symbol.At, Symbol.At))
+        val vBrick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.At))
+        val hBrick = Brick(Orientation.Horizontal, listOf(Symbol.Tilde, Symbol.At, Symbol.At))
 
         val config = GameConfig(5, 6, listOf(vBrick, hBrick))
         val engine = GameEngine(config)
@@ -215,8 +215,8 @@ class GameEngineTest {
 
     @Test
     fun `should stack vertical brick on top of horizontal brick`() {
-        val hBrick = Brick(Orientation.Horizontal, listOf(Symbol.At, Symbol.At, Symbol.At))
-        val vBrick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val hBrick = Brick(Orientation.Horizontal, listOf(Symbol.Tilde, Symbol.At, Symbol.At))
+        val vBrick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.At, Symbol.Star))
 
         val config = GameConfig(5, 6, listOf(hBrick, vBrick))
         val engine = GameEngine(config)
@@ -289,7 +289,7 @@ class GameEngineTest {
     @Test
     fun `should not move right into an existing brick`() {
         //
-        val vBrick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val vBrick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.At, Symbol.Star))
         val config = GameConfig(5, 5, listOf(vBrick, vBrick))
         val engine = GameEngine(config)
 
@@ -316,7 +316,7 @@ class GameEngineTest {
     @Test
     fun `should hard drop brick to the bottom`() {
         //
-        val brick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val brick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.At, Symbol.Star))
         // Field 5x10
         val config = GameConfig(5, 10, listOf(brick))
         val engine = GameEngine(config)
@@ -334,7 +334,7 @@ class GameEngineTest {
         // Vertical brick height 3. Bottom is at index 9.
         // Occupies: 7, 8, 9.
         assertEquals(Symbol.Star, engine.field.get(2, 9)) // Bottom
-        assertEquals(Symbol.Star, engine.field.get(2, 8)) // Middle
+        assertEquals(Symbol.At, engine.field.get(2, 8)) // Middle
         assertEquals(Symbol.Star, engine.field.get(2, 7)) // Top
     }
 }

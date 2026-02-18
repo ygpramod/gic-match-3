@@ -69,6 +69,7 @@ class GameEngine(config: GameConfig) {
 
     private fun lockBrick(active: ActiveBrick) {
         field.place(active)
+        field.removeMatches(active.occupiedCells().map { (x, y, _) -> x to y })
         activeBrick = null
     }
 
