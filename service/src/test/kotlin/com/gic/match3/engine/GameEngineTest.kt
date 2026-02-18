@@ -1,0 +1,149 @@
+package com.gic.match3.engine
+
+import com.gic.match3.domain.Brick
+import com.gic.match3.domain.GameConfig
+import com.gic.match3.domain.GameStatus
+import com.gic.match3.domain.Orientation
+import com.gic.match3.domain.Symbol
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Test
+
+class GameEngineTest {
+
+    @Test
+    fun `should initialize game with correct field dimensions`() {
+        val config = GameConfig(10, 20, emptyList())
+        val engine = GameEngine(config)
+        assertEquals(10, engine.field.width)
+        assertEquals(20, engine.field.height)
+    }
+
+    @Test
+    fun `should start with RUNNING status and transition to GAME_OVER`() {
+        val config = GameConfig(10, 20, emptyList())
+        val engine = GameEngine(config)
+        assertEquals(GameStatus.RUNNING, engine.status)
+        engine.endGame()
+        assertEquals(GameStatus.GAME_OVER, engine.status)
+    }
+
+    @Test
+    fun `should render current field state`() {
+        val config = GameConfig(3, 3, emptyList())
+        val engine = GameEngine(config)
+        val output = engine.render()
+        val expected = """
+            ...
+            ...
+            ...
+        """.trimIndent()
+        assertEquals(expected, output)
+    }
+
+    @Test
+    fun `should spawn vertical brick centered`() {
+        val brick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val config = GameConfig(5, 10, listOf(brick))
+        val engine = GameEngine(config)
+
+        engine.spawnNextBrick()
+
+        val active = engine.activeBrick!!
+
+        assertEquals(brick, active.brick)
+        assertEquals(Orientation.Vertical, active.brick.orientation)
+        assertEquals(2, active.x)
+        assertEquals(0, active.y)
+    }
+
+    @Test
+    fun `should handle even width field correctly`() {
+        val brick = Brick(Orientation.Horizontal, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val config = GameConfig(6, 10, listOf(brick))
+        val engine = GameEngine(config)
+
+        engine.spawnNextBrick()
+
+        assertEquals(1, engine.activeBrick!!.x)
+    }
+
+    @Test
+    fun `should not spawn if no bricks remain`() {
+        val config = GameConfig(5, 10, emptyList())
+        val engine = GameEngine(config)
+
+        engine.spawnNextBrick()
+
+        assertNull(engine.activeBrick)
+    }
+
+    @Test
+    fun `should spawn horizontal brick at centered position`() {
+        val brick = Brick(Orientation.Horizontal, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val config = GameConfig(5, 10, listOf(brick))
+        val engine = GameEngine(config)
+        assertNull(engine.activeBrick)
+
+        engine.spawnNextBrick()
+        assertNotNull(engine.activeBrick)
+
+        val active = engine.activeBrick!!
+        assertEquals(brick, active.brick)
+        assertEquals(0, active.y, "Should spawn at Row 0")
+        assertEquals(1, active.x, "Should be centered (Field 5 - Brick 3) / 2 = 1")
+    }
+
+    @Test
+    fun `should move active brick down on tick`() {
+        val brick = Brick(Orientation.Horizontal, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val config = GameConfig(5, 10, listOf(brick))
+        val engine = GameEngine(config)
+
+        engine.spawnNextBrick()
+        val initialY = engine.activeBrick!!.y // Should be 0
+
+        engine.tick()
+
+        val newY = engine.activeBrick!!.y
+        assertEquals(initialY + 1, newY, "Brick should have moved down by 1 row")
+    }
+
+    @Test
+    fun `should lock horizontal brick into field when hitting bottom`() {
+        val brick = Brick(Orientation.Horizontal, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val config = GameConfig(5, 5, listOf(brick))
+        val engine = GameEngine(config)
+
+        engine.spawnNextBrick()
+
+        engine.activeBrick!!.y = 4
+
+        engine.tick()
+
+        assertNull(engine.activeBrick, "Active brick should be null after locking")
+
+        assertEquals(Symbol.Star, engine.field.get(1, 4))
+        assertEquals(Symbol.Star, engine.field.get(2, 4))
+        assertEquals(Symbol.Star, engine.field.get(3, 4))
+    }
+
+    @Test
+    fun `should lock vertical brick into field when hitting bottom`() {
+        val brick = Brick(Orientation.Vertical, listOf(Symbol.Triangle, Symbol.At, Symbol.Star))
+        val config = GameConfig(5, 5, listOf(brick))
+        val engine = GameEngine(config)
+
+        engine.spawnNextBrick()
+
+        engine.activeBrick!!.y = 2
+
+        engine.tick()
+
+        assertNull(engine.activeBrick, "Active brick should be null after locking")
+        assertEquals(Symbol.Triangle, engine.field.get(2, 2))
+        assertEquals(Symbol.At,       engine.field.get(2, 3))
+        assertEquals(Symbol.Star,     engine.field.get(2, 4))
+    }
+}
