@@ -4,5 +4,9 @@ enum class Symbol(val char: Char) {
     Triangle('^'),
     Star('*'),
     At('@'),
-    Tilde('~');
+    Tilde('~'),
+    Square('#'),
+    Diamond('O');
+
+    override fun toString() = char.toString()
 }
