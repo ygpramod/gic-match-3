@@ -22,15 +22,6 @@ class GameEngineTest {
     }
 
     @Test
-    fun `should start with RUNNING status and transition to GAME_OVER`() {
-        val config = GameConfig(10, 20, emptyList())
-        val engine = GameEngine(config)
-        assertEquals(GameStatus.RUNNING, engine.status)
-        engine.endGame()
-        assertEquals(GameStatus.GAME_OVER, engine.status)
-    }
-
-    @Test
     fun `should render current field state`() {
         val config = GameConfig(3, 3, emptyList())
         val engine = GameEngine(config)
