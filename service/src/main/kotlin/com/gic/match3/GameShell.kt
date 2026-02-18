@@ -15,21 +15,34 @@ class GameShell(
     private val scanner = Scanner(input)
 
     fun run() {
+        output.println("Match-3 Game Shell v1.2 - Ready.")
+        output.flush()
+
         while (true) {
-            val engine = initializeGame()
-            runGameLoop(engine)
-            if (handleGameEnd()) continue
-            else break
+            try {
+                val engine = initializeGame()
+                runGameLoop(engine)
+                if (handleGameEnd()) continue
+                else break // Quit (Q)
+            } catch (e: Exception) {
+                output.println("Critical Error in main loop: ${e.message}")
+                output.flush()
+                break
+            }
         }
     }
 
     private fun initializeGame(): GameEngine {
         while (true) {
-            output.println("Please enter field size (width and height) and up to 5 bricks set:")
+            output.println("Please enter field size (width and height) and up to 5 bricks:")
+            output.print("Init> ")
+            output.flush()
+
             if (!scanner.hasNextLine()) throw RuntimeException("Input stream closed unexpectedly")
 
             val line = scanner.nextLine()
             try {
+                if (line.isBlank()) continue
                 val config = InputParser.parse(line)
                 val engine = GameEngine(config)
                 engine.spawnNextBrick()
@@ -43,7 +56,9 @@ class GameShell(
     private fun runGameLoop(engine: GameEngine) {
         while (engine.status == GameStatus.RUNNING) {
             output.println(engine.render())
-            output.println("Enter up to 2 commands to process before moving to the next frame (valid commands are L,R,D)")
+            output.println("Enter commands (L,R,D):")
+            output.print("Game> ")
+            output.flush()
             if (!scanner.hasNextLine()) break
             val line = scanner.nextLine()
             processCommands(line, engine)
@@ -53,6 +68,7 @@ class GameShell(
             }
         }
         output.println(engine.render())
+        output.flush()
     }
 
     private fun processCommands(line: String, engine: GameEngine) {
@@ -71,8 +87,11 @@ class GameShell(
 
     private fun handleGameEnd(): Boolean {
         output.println("Game Over")
+        output.flush()
+
         while (true) {
-            output.println("Enter S to start over or Q to quit")
+            output.print("Enter S to start over or Q to quit: ")
+            output.flush()
             if (!scanner.hasNextLine()) return false
 
             val input = scanner.nextLine().trim().uppercase()
@@ -80,11 +99,10 @@ class GameShell(
                 "S" -> return true
                 "Q" -> {
                     output.println("Thank you for playing Match-3!")
+                    output.flush()
                     return false
                 }
-                else -> {
-                    // Invalid input, re-prompt (implied by loop)
-                }
+                else -> output.println("Invalid option.")
             }
         }
     }

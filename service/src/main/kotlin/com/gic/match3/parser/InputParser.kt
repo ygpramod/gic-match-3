@@ -36,7 +36,7 @@ object InputParser {
         }
 
         val symbols = token.substring(1).map { char ->
-            Symbol.entries.find { it.char == char }
+            Symbol.values().find { it.char == char }
                 ?: throw IllegalArgumentException("Invalid symbol: $char")
         }
 
