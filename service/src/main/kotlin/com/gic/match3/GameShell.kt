@@ -18,11 +18,8 @@ class GameShell(
         while (true) {
             val engine = initializeGame()
             runGameLoop(engine)
-            if (handleGameEnd()) {
-                continue // Restart (S)
-            } else {
-                break // Quit (Q)
-            }
+            if (handleGameEnd()) continue
+            else break
         }
     }
 
@@ -55,6 +52,7 @@ class GameShell(
                 engine.spawnNextBrick()
             }
         }
+        output.println(engine.render())
     }
 
     private fun processCommands(line: String, engine: GameEngine) {
