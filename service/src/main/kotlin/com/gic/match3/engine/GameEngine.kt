@@ -43,9 +43,12 @@ class GameEngine(config: GameConfig) {
 
     private fun canMoveTo(active: ActiveBrick, targetY: Int): Boolean {
         val heightOffset = if (active.brick.orientation == Orientation.Vertical) 2 else 0
-        val bottomY = targetY + heightOffset
+        if (targetY + heightOffset >= field.height) return false
 
-        return bottomY < field.height
+        val simulatedBrick = active.copy(y = targetY)
+
+        return simulatedBrick.occupiedCells()
+            .none { (x, y, _) -> field.isOccupied(x, y) }
     }
 
     private fun lockBrick(active: ActiveBrick) {

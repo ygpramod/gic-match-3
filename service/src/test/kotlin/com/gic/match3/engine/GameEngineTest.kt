@@ -143,7 +143,98 @@ class GameEngineTest {
 
         assertNull(engine.activeBrick, "Active brick should be null after locking")
         assertEquals(Symbol.Triangle, engine.field.get(2, 2))
-        assertEquals(Symbol.At,       engine.field.get(2, 3))
-        assertEquals(Symbol.Star,     engine.field.get(2, 4))
+        assertEquals(Symbol.At, engine.field.get(2, 3))
+        assertEquals(Symbol.Star, engine.field.get(2, 4))
     }
+
+    @Test
+    fun `should stack horizontal bricks`() {
+        val hBrick = Brick(Orientation.Horizontal, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val config = GameConfig(5, 5, listOf(hBrick, hBrick))
+        val engine = GameEngine(config)
+
+        engine.spawnNextBrick()
+        engine.activeBrick!!.y = 4
+        engine.tick()
+
+        engine.spawnNextBrick()
+        val active = engine.activeBrick!!
+
+        active.y = 3
+
+        engine.tick()
+
+        assertNull(engine.activeBrick)
+        assertEquals(Symbol.Star, engine.field.get(1, 3))
+    }
+
+    @Test
+    fun `should stack vertical bricks`() {
+        val vBrick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val config = GameConfig(5, 6, listOf(vBrick, vBrick))
+        val engine = GameEngine(config)
+
+        engine.spawnNextBrick()
+        engine.activeBrick!!.y = 3
+        engine.tick() // Locks
+
+        engine.spawnNextBrick()
+        assertEquals(0, engine.activeBrick!!.y)
+
+        engine.tick()
+
+        assertNull(engine.activeBrick, "Brick should lock when hitting the stack")
+
+        assertEquals(Symbol.Star, engine.field.get(2, 2)) // Bottom of top brick
+        assertEquals(Symbol.Star, engine.field.get(2, 3)) // Top of bottom brick
+    }
+
+    @Test
+    fun `should stack horizontal brick on top of vertical brick`() {
+        val vBrick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val hBrick = Brick(Orientation.Horizontal, listOf(Symbol.At, Symbol.At, Symbol.At))
+
+        val config = GameConfig(5, 6, listOf(vBrick, hBrick))
+        val engine = GameEngine(config)
+
+        engine.spawnNextBrick()
+        engine.activeBrick!!.y = 3
+        engine.tick() // Locks
+
+        engine.spawnNextBrick()
+
+        engine.activeBrick!!.y = 2
+
+        engine.tick()
+
+        assertNull(engine.activeBrick, "Horizontal brick should lock on top of vertical")
+        assertEquals(Symbol.At, engine.field.get(2, 2)) // Center of Horizontal
+        assertEquals(Symbol.Star, engine.field.get(2, 3)) // Top of Vertical
+    }
+
+    @Test
+    fun `should stack vertical brick on top of horizontal brick`() {
+        val hBrick = Brick(Orientation.Horizontal, listOf(Symbol.At, Symbol.At, Symbol.At))
+        val vBrick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+
+        val config = GameConfig(5, 6, listOf(hBrick, vBrick))
+        val engine = GameEngine(config)
+
+        engine.spawnNextBrick()
+        engine.activeBrick!!.y = 5
+        engine.tick() // Locks
+
+        engine.spawnNextBrick()
+
+        engine.activeBrick!!.y = 2
+
+        engine.tick()
+
+        assertNull(engine.activeBrick, "Vertical brick should lock on top of horizontal")
+        assertEquals(Symbol.Star, engine.field.get(2, 4)) // Bottom of Vertical (Y=2+2)
+        assertEquals(Symbol.At, engine.field.get(2, 5))   // Center of Horizontal
+    }
+
+
+
 }

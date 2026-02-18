@@ -16,4 +16,8 @@ class Field(val width: Int, val height: Int) {
     private fun isValid(x: Int, y: Int): Boolean {
         return x in 0 until width && y in 0 until height
     }
+
+    fun isOccupied(x: Int, y: Int): Boolean {
+        return isValid(x, y) && grid[y][x] != null
+    }
 }
