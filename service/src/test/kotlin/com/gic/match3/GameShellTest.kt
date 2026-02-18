@@ -82,6 +82,10 @@ class GameEngine(config: GameConfig) {
         activeBrick = null
     }
 
+    fun endGame() {
+        status = GameStatus.GAME_OVER
+    }
+
     fun render(): String {
         return ConsoleRenderer.render(field, activeBrick)
     }

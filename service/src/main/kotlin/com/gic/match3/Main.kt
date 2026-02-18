@@ -1,5 +1,6 @@
 package com.gic.match3
 
 fun main() {
-    println("Match-3 Falling Bricks Game - Initialized")
+    val shell = GameShell(System.`in`, System.out)
+    shell.run()
 }
