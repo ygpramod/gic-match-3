@@ -94,7 +94,7 @@ class GameEngineTest {
         val engine = GameEngine(config)
 
         engine.spawnNextBrick()
-        val initialY = engine.activeBrick!!.y // Should be 0
+        val initialY = engine.activeBrick!!.y
 
         engine.tick()
 
@@ -168,7 +168,7 @@ class GameEngineTest {
 
         engine.spawnNextBrick()
         engine.activeBrick!!.y = 3
-        engine.tick() // Locks
+        engine.tick()
 
         engine.spawnNextBrick()
         assertEquals(0, engine.activeBrick!!.y)
@@ -191,7 +191,7 @@ class GameEngineTest {
 
         engine.spawnNextBrick()
         engine.activeBrick!!.y = 3
-        engine.tick() // Locks
+        engine.tick()
 
         engine.spawnNextBrick()
 
@@ -214,7 +214,7 @@ class GameEngineTest {
 
         engine.spawnNextBrick()
         engine.activeBrick!!.y = 5
-        engine.tick() // Locks
+        engine.tick()
 
         engine.spawnNextBrick()
 
@@ -258,7 +258,7 @@ class GameEngineTest {
         val engine = GameEngine(config)
 
         engine.spawnNextBrick()
-        engine.activeBrick!!.x = 0 // Force to left edge
+        engine.activeBrick!!.x = 0
 
         engine.input(Command.Left)
         assertEquals(0, engine.activeBrick!!.x)
@@ -271,7 +271,7 @@ class GameEngineTest {
         val engine = GameEngine(config)
 
         engine.spawnNextBrick()
-        engine.activeBrick!!.x = 4 // Force to right edge
+        engine.activeBrick!!.x = 4
 
         engine.input(Command.Right)
         assertEquals(4, engine.activeBrick!!.x)
@@ -279,51 +279,30 @@ class GameEngineTest {
 
     @Test
     fun `should not move right into an existing brick`() {
-        //
         val vBrick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.At, Symbol.Star))
         val config = GameConfig(5, 5, listOf(vBrick, vBrick))
         val engine = GameEngine(config)
 
-        // 1. Drop first brick in Column 1
         engine.spawnNextBrick()
-        // Force to Column 1, Bottom (y=2 -> occupies 2,3,4)
         engine.activeBrick!!.x = 1
         engine.activeBrick!!.y = 2
         engine.tick() // Locks
-
-        // 2. Spawn second brick in Column 0
         engine.spawnNextBrick()
         engine.activeBrick!!.x = 0
-        // Move it down to y=2 (side-by-side with the obstacle)
         engine.activeBrick!!.y = 2
-
-        // 3. Try to move Right (into the obstacle)
         engine.input(Command.Right)
-
-        // 4. Verify it stayed at x=0
         assertEquals(0, engine.activeBrick!!.x, "Should not move into occupied space")
     }
 
     @Test
     fun `should hard drop brick to the bottom`() {
-        //
         val brick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.At, Symbol.Star))
-        // Field 5x10
         val config = GameConfig(5, 10, listOf(brick))
         val engine = GameEngine(config)
-
         engine.spawnNextBrick()
-        // Starts at y=0.
-
-        // Act: Hard Drop
         engine.input(Command.Down)
 
-        // Assert: Brick is locked (null)
         assertNull(engine.activeBrick, "Brick should be locked after hard drop")
-
-        // Assert: Field has the brick at the bottom
-        // Vertical brick height 3. Bottom is at index 9.
-        // Occupies: 7, 8, 9.
         assertEquals(Symbol.Star, engine.field.get(2, 9)) // Bottom
         assertEquals(Symbol.At, engine.field.get(2, 8)) // Middle
         assertEquals(Symbol.Star, engine.field.get(2, 7)) // Top
@@ -331,19 +310,12 @@ class GameEngineTest {
 
     @Test
     fun `should set game over when spawn area is blocked`() {
-        //
         val brick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
         val config = GameConfig(5, 5, listOf(brick))
         val engine = GameEngine(config)
 
-        // 1. Block the spawn point (Center X=2, Y=0)
-        // Note: Field width 5. Brick width 1. Start X = (5-1)/2 = 2.
         engine.field.set(2, 0, Symbol.At)
-
-        // 2. Try to spawn
         engine.spawnNextBrick()
-
-        // 3. Assert Game Over
         assertEquals(GameStatus.GAME_OVER, engine.status)
         assertNull(engine.activeBrick, "Should not spawn brick if blocked")
     }
