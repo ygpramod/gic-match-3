@@ -22,13 +22,17 @@ class GameEngine(config: GameConfig) {
         private set
 
     fun spawnNextBrick() {
-        val nextBrick = brickQueue.poll() ?: return // TODO: Handle Game End if empty?
+        if (status == GameStatus.GAME_OVER) return
+        val nextBrick = brickQueue.poll() ?: return
 
         val brickWidth = if (nextBrick.orientation == Orientation.Horizontal) 3 else 1
         val startX = (field.width - brickWidth) / 2
         val startY = 0
 
-        activeBrick = ActiveBrick(nextBrick, startX, startY)
+        val tempBrick = ActiveBrick(nextBrick, startX, startY)
+
+        if (field.canFit(tempBrick, startX, startY)) activeBrick = tempBrick
+        else status = GameStatus.GAME_OVER
     }
 
     fun tick() {

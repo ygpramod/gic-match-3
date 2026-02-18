@@ -337,4 +337,23 @@ class GameEngineTest {
         assertEquals(Symbol.At, engine.field.get(2, 8)) // Middle
         assertEquals(Symbol.Star, engine.field.get(2, 7)) // Top
     }
+
+    @Test
+    fun `should set game over when spawn area is blocked`() {
+        //
+        val brick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val config = GameConfig(5, 5, listOf(brick))
+        val engine = GameEngine(config)
+
+        // 1. Block the spawn point (Center X=2, Y=0)
+        // Note: Field width 5. Brick width 1. Start X = (5-1)/2 = 2.
+        engine.field.set(2, 0, Symbol.At)
+
+        // 2. Try to spawn
+        engine.spawnNextBrick()
+
+        // 3. Assert Game Over
+        assertEquals(GameStatus.GAME_OVER, engine.status)
+        assertNull(engine.activeBrick, "Should not spawn brick if blocked")
+    }
 }
