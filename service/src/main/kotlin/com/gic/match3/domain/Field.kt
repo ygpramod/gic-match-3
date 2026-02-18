@@ -20,4 +20,19 @@ class Field(val width: Int, val height: Int) {
     fun isOccupied(x: Int, y: Int): Boolean {
         return isValid(x, y) && grid[y][x] != null
     }
+
+    fun canFit(brick: ActiveBrick, targetX: Int, targetY: Int): Boolean {
+        val simulated = brick.copy(x = targetX, y = targetY)
+
+        return simulated.occupiedCells().all { (x, y, _) ->
+            val inBounds = isValid(x, y)
+            inBounds && !isOccupied(x, y)
+        }
+    }
+
+    fun place(brick: ActiveBrick) {
+        brick.occupiedCells().forEach { (x, y, symbol) ->
+            set(x, y, symbol)
+        }
+    }
 }

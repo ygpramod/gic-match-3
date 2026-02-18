@@ -2,6 +2,7 @@ package com.gic.match3.engine
 
 import com.gic.match3.domain.ActiveBrick
 import com.gic.match3.domain.Brick
+import com.gic.match3.domain.Command
 import com.gic.match3.domain.Field
 import com.gic.match3.domain.GameConfig
 import com.gic.match3.domain.GameStatus
@@ -32,29 +33,42 @@ class GameEngine(config: GameConfig) {
 
     fun tick() {
         val active = activeBrick ?: return
-        val nextY = active.y + 1
+        if (!tryMove(active, 0, 1)) lockBrick(active)
+    }
 
-        if (canMoveTo(active, nextY)) {
-            active.y = nextY
-        } else {
-            lockBrick(active)
+    fun input(command: Command) {
+        val active = activeBrick ?: return
+
+        when (command) {
+            Command.Left -> tryMove(active, -1, 0)
+            Command.Right -> tryMove(active, 1, 0)
+            Command.Down -> performHardDrop(active)
         }
     }
 
-    private fun canMoveTo(active: ActiveBrick, targetY: Int): Boolean {
-        val heightOffset = if (active.brick.orientation == Orientation.Vertical) 2 else 0
-        if (targetY + heightOffset >= field.height) return false
+    private fun performHardDrop(active: ActiveBrick) {
+        var targetY = active.y
+        while (field.canFit(active, active.x, targetY + 1)) {
+            targetY++
+        }
+        active.y = targetY
+        lockBrick(active)
+    }
 
-        val simulatedBrick = active.copy(y = targetY)
+    private fun tryMove(active: ActiveBrick, dx: Int, dy: Int): Boolean {
+        val nextX = active.x + dx
+        val nextY = active.y + dy
 
-        return simulatedBrick.occupiedCells()
-            .none { (x, y, _) -> field.isOccupied(x, y) }
+        if (field.canFit(active, nextX, nextY)) {
+            active.x = nextX
+            active.y = nextY
+            return true
+        }
+        return false
     }
 
     private fun lockBrick(active: ActiveBrick) {
-        active.occupiedCells().forEach { (x, y, symbol) ->
-            field.set(x, y, symbol)
-        }
+        field.place(active)
         activeBrick = null
     }
 

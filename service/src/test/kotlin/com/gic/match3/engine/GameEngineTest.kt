@@ -1,6 +1,7 @@
 package com.gic.match3.engine
 
 import com.gic.match3.domain.Brick
+import com.gic.match3.domain.Command
 import com.gic.match3.domain.GameConfig
 import com.gic.match3.domain.GameStatus
 import com.gic.match3.domain.Orientation
@@ -235,6 +236,105 @@ class GameEngineTest {
         assertEquals(Symbol.At, engine.field.get(2, 5))   // Center of Horizontal
     }
 
+    @Test
+    fun `should move active brick left`() {
+        val brick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val config = GameConfig(5, 10, listOf(brick))
+        val engine = GameEngine(config)
 
+        engine.spawnNextBrick()
 
+        engine.input(Command.Left)
+        assertEquals(1, engine.activeBrick!!.x)
+    }
+
+    @Test
+    fun `should move active brick right`() {
+        val brick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val config = GameConfig(5, 10, listOf(brick))
+        val engine = GameEngine(config)
+
+        engine.spawnNextBrick()
+
+        engine.input(Command.Right)
+        assertEquals(3, engine.activeBrick!!.x)
+    }
+
+    @Test
+    fun `should not move past left wall`() {
+        val brick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val config = GameConfig(5, 10, listOf(brick))
+        val engine = GameEngine(config)
+
+        engine.spawnNextBrick()
+        engine.activeBrick!!.x = 0 // Force to left edge
+
+        engine.input(Command.Left)
+        assertEquals(0, engine.activeBrick!!.x)
+    }
+
+    @Test
+    fun `should not move past right wall`() {
+        val brick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val config = GameConfig(5, 10, listOf(brick))
+        val engine = GameEngine(config)
+
+        engine.spawnNextBrick()
+        engine.activeBrick!!.x = 4 // Force to right edge
+
+        engine.input(Command.Right)
+        assertEquals(4, engine.activeBrick!!.x)
+    }
+
+    @Test
+    fun `should not move right into an existing brick`() {
+        //
+        val vBrick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        val config = GameConfig(5, 5, listOf(vBrick, vBrick))
+        val engine = GameEngine(config)
+
+        // 1. Drop first brick in Column 1
+        engine.spawnNextBrick()
+        // Force to Column 1, Bottom (y=2 -> occupies 2,3,4)
+        engine.activeBrick!!.x = 1
+        engine.activeBrick!!.y = 2
+        engine.tick() // Locks
+
+        // 2. Spawn second brick in Column 0
+        engine.spawnNextBrick()
+        engine.activeBrick!!.x = 0
+        // Move it down to y=2 (side-by-side with the obstacle)
+        engine.activeBrick!!.y = 2
+
+        // 3. Try to move Right (into the obstacle)
+        engine.input(Command.Right)
+
+        // 4. Verify it stayed at x=0
+        assertEquals(0, engine.activeBrick!!.x, "Should not move into occupied space")
+    }
+
+    @Test
+    fun `should hard drop brick to the bottom`() {
+        //
+        val brick = Brick(Orientation.Vertical, listOf(Symbol.Star, Symbol.Star, Symbol.Star))
+        // Field 5x10
+        val config = GameConfig(5, 10, listOf(brick))
+        val engine = GameEngine(config)
+
+        engine.spawnNextBrick()
+        // Starts at y=0.
+
+        // Act: Hard Drop
+        engine.input(Command.Down)
+
+        // Assert: Brick is locked (null)
+        assertNull(engine.activeBrick, "Brick should be locked after hard drop")
+
+        // Assert: Field has the brick at the bottom
+        // Vertical brick height 3. Bottom is at index 9.
+        // Occupies: 7, 8, 9.
+        assertEquals(Symbol.Star, engine.field.get(2, 9)) // Bottom
+        assertEquals(Symbol.Star, engine.field.get(2, 8)) // Middle
+        assertEquals(Symbol.Star, engine.field.get(2, 7)) // Top
+    }
 }
