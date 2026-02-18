@@ -36,9 +36,9 @@ class GameEngineTest {
         val engine = GameEngine(config)
         val output = engine.render()
         val expected = """
-            ...
-            ...
-            ...
+            . . .
+            . . .
+            . . .
         """.trimIndent()
         assertEquals(expected, output)
     }

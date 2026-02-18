@@ -82,6 +82,6 @@ class GameEngine(config: GameConfig) {
     }
 
     fun render(): String {
-        return ConsoleRenderer.render(field)
+        return ConsoleRenderer.render(field, activeBrick)
     }
 }
